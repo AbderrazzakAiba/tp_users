@@ -42,3 +42,14 @@ def test_fails_when_email_not_valid_format():
 
     assert response.success is False
     assert len(repo.saved) == 0
+
+def test_fails_when_name_is_empty():
+    repo = InMemoryUserRepositoryFake()
+    usecase = SaveUserUseCase(repo)
+
+    request = SaveUserRequest("alex@example.com", "")
+
+    response = usecase.execute(request)
+
+    assert response.success is False
+    assert len(repo.saved) == 0
