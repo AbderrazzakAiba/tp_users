@@ -20,3 +20,14 @@ def test_saves_user():
 
     assert response.success is True
     assert len(repo.saved) == 1
+
+def test_fails_when_email_is_empty():
+    repo = InMemoryUserRepositoryFake()
+    usecase = SaveUserUseCase(repo)
+
+    request = SaveUserRequest("", "Alex")
+
+    response = usecase.execute(request)
+
+    assert response.success is False
+    assert len(repo.saved) == 0
