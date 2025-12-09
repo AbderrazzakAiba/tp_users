@@ -5,5 +5,8 @@ class UpdateUserUseCase:
         self.repo = repo
 
     def execute(self, request):
-        updated = self.repo.update(request.email, request.name)
+        updated = self._update_user(request.email, request.name)
         return UpdateUserResponse(updated)
+
+    def _update_user(self, email, name):
+        return self.repo.update(email, name)
