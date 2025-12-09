@@ -64,3 +64,13 @@ def test_fails_when_name_is_too_short():
 
     assert response.success is False
     assert len(repo.saved) == 0
+def test_fails_when_name_contains_digits():
+    repo = InMemoryUserRepositoryFake()
+    usecase = SaveUserUseCase(repo)
+
+    request = SaveUserRequest("alex@example.com", "Al3x")  # contains number
+
+    response = usecase.execute(request)
+
+    assert response.success is False
+    assert len(repo.saved) == 0
