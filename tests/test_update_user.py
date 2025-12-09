@@ -41,3 +41,16 @@ def test_update_non_existing_user():
 
     assert response.updated is False
     assert len(repo.saved) == 0
+
+def test_update_user_with_invalid_name():
+    repo = InMemoryUserRepositoryFake()
+    repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
+
+    usecase = UpdateUserUseCase(repo)
+
+    request = UpdateUserRequest('alex@example.com', 'A')
+
+    response = usecase.execute(request)
+
+    assert response.updated is False
+    assert repo.saved[0].name == 'Alex'
