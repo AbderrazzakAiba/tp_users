@@ -15,27 +15,37 @@ class InMemoryUserRepositoryFake:
         return len(self.saved) < initial_len
 
 
+class DeleteUserPresenterFake:
+    def __init__(self):
+        self.last_response = None
+
+    def present(self, response):
+        self.last_response = response
+
+
 def test_delete_existing_user():
     repo = InMemoryUserRepositoryFake()
-    usecase = DeleteUserUseCase(repo)
+    presenter = DeleteUserPresenterFake()
+    usecase = DeleteUserUseCase(repo, presenter)
 
     repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
 
     request = DeleteUserRequest('alex@example.com')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.deleted is True
+    assert presenter.last_response.deleted is True
     assert len(repo.saved) == 0
 
 
 def test_delete_non_existing_user():
     repo = InMemoryUserRepositoryFake()
-    usecase = DeleteUserUseCase(repo)
+    presenter = DeleteUserPresenterFake()
+    usecase = DeleteUserUseCase(repo, presenter)
 
     request = DeleteUserRequest('not_found@example.com')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.deleted is False
+    assert presenter.last_response.deleted is False
     assert len(repo.saved) == 0
