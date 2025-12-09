@@ -23,29 +23,35 @@ class DeleteUserPresenterFake:
         self.last_response = response
 
 
-def test_delete_existing_user():
+def make_usecase():
     repo = InMemoryUserRepositoryFake()
     presenter = DeleteUserPresenterFake()
     usecase = DeleteUserUseCase(repo, presenter)
+    return usecase, repo, presenter
 
-    repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
 
-    request = DeleteUserRequest('alex@example.com')
+def make_request(email="alex@example.com"):
+    return DeleteUserRequest(email)
 
-    usecase.execute(request)
+
+def make_user(email="alex@example.com", name="Alex"):
+    return type('User', (), {'email': email, 'name': name})()
+
+
+def test_delete_existing_user():
+    usecase, repo, presenter = make_usecase()
+    repo.save(make_user())
+
+    usecase.execute(make_request())
 
     assert presenter.last_response.deleted is True
     assert len(repo.saved) == 0
 
 
 def test_delete_non_existing_user():
-    repo = InMemoryUserRepositoryFake()
-    presenter = DeleteUserPresenterFake()
-    usecase = DeleteUserUseCase(repo, presenter)
+    usecase, repo, presenter = make_usecase()
 
-    request = DeleteUserRequest('not_found@example.com')
-
-    usecase.execute(request)
+    usecase.execute(make_request("not_found@example.com"))
 
     assert presenter.last_response.deleted is False
     assert len(repo.saved) == 0

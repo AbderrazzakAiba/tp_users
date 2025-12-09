@@ -24,29 +24,35 @@ class GetUserPresenterFake:
         self.last_response = response
 
 
-def test_get_existing_user():
+def make_usecase():
     repo = InMemoryUserRepositoryFake()
     presenter = GetUserPresenterFake()
     usecase = GetUserUseCase(repo, presenter)
+    return usecase, repo, presenter
 
-    repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
 
-    request = GetUserRequest('alex@example.com')
+def make_request(email="alex@example.com"):
+    return GetUserRequest(email)
 
-    usecase.execute(request)
+
+def make_user(email="alex@example.com", name="Alex"):
+    return type('User', (), {'email': email, 'name': name})()
+
+
+def test_get_existing_user():
+    usecase, repo, presenter = make_usecase()
+    repo.save(make_user())
+
+    usecase.execute(make_request())
 
     assert presenter.last_response.found is True
-    assert presenter.last_response.user.email == 'alex@example.com'
+    assert presenter.last_response.user.email == "alex@example.com"
 
 
 def test_get_non_existing_user():
-    repo = InMemoryUserRepositoryFake()
-    presenter = GetUserPresenterFake()
-    usecase = GetUserUseCase(repo, presenter)
+    usecase, repo, presenter = make_usecase()
 
-    request = GetUserRequest('not_found@example.com')
-
-    usecase.execute(request)
+    usecase.execute(make_request("not_found@example.com"))
 
     assert presenter.last_response.found is False
     assert presenter.last_response.user is None

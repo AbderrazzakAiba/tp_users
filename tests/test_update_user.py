@@ -25,44 +25,45 @@ class UpdateUserPresenterFake:
         self.last_response = response
 
 
-def test_update_existing_user():
+def make_usecase():
     repo = InMemoryUserRepositoryFake()
     presenter = UpdateUserPresenterFake()
     usecase = UpdateUserUseCase(repo, presenter)
+    return usecase, repo, presenter
 
-    repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
 
-    request = UpdateUserRequest('alex@example.com', 'Alicia')
+def make_request(email="alex@example.com", name="Alex Updated"):
+    return UpdateUserRequest(email, name)
 
-    usecase.execute(request)
+
+def make_user(email="alex@example.com", name="Alex"):
+    return type('User', (), {'email': email, 'name': name})()
+
+
+def test_update_existing_user():
+    usecase, repo, presenter = make_usecase()
+    repo.save(make_user())
+
+    usecase.execute(make_request(name="Alicia"))
 
     assert presenter.last_response.updated is True
-    assert repo.saved[0].name == 'Alicia'
+    assert repo.saved[0].name == "Alicia"
 
 
 def test_update_non_existing_user():
-    repo = InMemoryUserRepositoryFake()
-    presenter = UpdateUserPresenterFake()
-    usecase = UpdateUserUseCase(repo, presenter)
+    usecase, repo, presenter = make_usecase()
 
-    request = UpdateUserRequest('not_found@example.com', 'Someone')
-
-    usecase.execute(request)
+    usecase.execute(make_request(email="not_found@example.com", name="Someone"))
 
     assert presenter.last_response.updated is False
     assert len(repo.saved) == 0
 
 
 def test_update_user_with_invalid_name():
-    repo = InMemoryUserRepositoryFake()
-    presenter = UpdateUserPresenterFake()
-    repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
+    usecase, repo, presenter = make_usecase()
+    repo.save(make_user())
 
-    usecase = UpdateUserUseCase(repo, presenter)
-
-    request = UpdateUserRequest('alex@example.com', 'A')
-
-    usecase.execute(request)
+    usecase.execute(make_request(name="A"))
 
     assert presenter.last_response.updated is False
-    assert repo.saved[0].name == 'Alex'
+    assert repo.saved[0].name == "Alex"
