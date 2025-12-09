@@ -74,3 +74,20 @@ def test_fails_when_name_contains_digits():
 
     assert response.success is False
     assert len(repo.saved) == 0
+
+
+def test_fails_when_email_already_exists():
+    repo = InMemoryUserRepositoryFake()
+    usecase = SaveUserUseCase(repo)
+
+    # save user first
+    request1 = SaveUserRequest("alex@example.com", "Alex")
+    usecase.execute(request1)
+
+    # try to save again
+    request2 = SaveUserRequest("alex@example.com", "Alex")
+    response = usecase.execute(request2)
+
+    assert response.success is False
+    # still only one saved user
+    assert len(repo.saved) == 1
