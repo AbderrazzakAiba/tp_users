@@ -17,40 +17,52 @@ class InMemoryUserRepositoryFake:
         return False
 
 
+class UpdateUserPresenterFake:
+    def __init__(self):
+        self.last_response = None
+
+    def present(self, response):
+        self.last_response = response
+
+
 def test_update_existing_user():
     repo = InMemoryUserRepositoryFake()
+    presenter = UpdateUserPresenterFake()
+    usecase = UpdateUserUseCase(repo, presenter)
 
     repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
-
-    usecase = UpdateUserUseCase(repo)
 
     request = UpdateUserRequest('alex@example.com', 'Alicia')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.updated is True
+    assert presenter.last_response.updated is True
     assert repo.saved[0].name == 'Alicia'
+
 
 def test_update_non_existing_user():
     repo = InMemoryUserRepositoryFake()
-    usecase = UpdateUserUseCase(repo)
+    presenter = UpdateUserPresenterFake()
+    usecase = UpdateUserUseCase(repo, presenter)
 
     request = UpdateUserRequest('not_found@example.com', 'Someone')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.updated is False
+    assert presenter.last_response.updated is False
     assert len(repo.saved) == 0
+
 
 def test_update_user_with_invalid_name():
     repo = InMemoryUserRepositoryFake()
+    presenter = UpdateUserPresenterFake()
     repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
 
-    usecase = UpdateUserUseCase(repo)
+    usecase = UpdateUserUseCase(repo, presenter)
 
     request = UpdateUserRequest('alex@example.com', 'A')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.updated is False
+    assert presenter.last_response.updated is False
     assert repo.saved[0].name == 'Alex'
