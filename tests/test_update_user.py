@@ -30,3 +30,14 @@ def test_update_existing_user():
 
     assert response.updated is True
     assert repo.saved[0].name == 'Alicia'
+
+def test_update_non_existing_user():
+    repo = InMemoryUserRepositoryFake()
+    usecase = UpdateUserUseCase(repo)
+
+    request = UpdateUserRequest('not_found@example.com', 'Someone')
+
+    response = usecase.execute(request)
+
+    assert response.updated is False
+    assert len(repo.saved) == 0
