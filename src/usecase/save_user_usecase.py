@@ -8,12 +8,18 @@ class SaveUserUseCase:
         self.repo = repo
 
     def execute(self, request):
-        if not is_valid_email(request.email):
-            return SaveUserResponse(False)
-
-        if not is_valid_name(request.name):
+        if not self._is_valid_request(request):
             return SaveUserResponse(False)
 
         user = User(request.email, request.name)
         self.repo.save(user)
         return SaveUserResponse(True)
+
+    def _is_valid_request(self, request):
+        if not is_valid_email(request.email):
+            return False
+
+        if not is_valid_name(request.name):
+            return False
+
+        return True
