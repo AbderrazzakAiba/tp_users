@@ -16,26 +16,37 @@ class InMemoryUserRepositoryFake:
         return None
 
 
+class GetUserPresenterFake:
+    def __init__(self):
+        self.last_response = None
+
+    def present(self, response):
+        self.last_response = response
+
+
 def test_get_existing_user():
     repo = InMemoryUserRepositoryFake()
-    usecase = GetUserUseCase(repo)
+    presenter = GetUserPresenterFake()
+    usecase = GetUserUseCase(repo, presenter)
 
     repo.save(type('User', (), {'email': 'alex@example.com', 'name': 'Alex'})())
 
     request = GetUserRequest('alex@example.com')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.found is True
-    assert response.user.email == 'alex@example.com'
+    assert presenter.last_response.found is True
+    assert presenter.last_response.user.email == 'alex@example.com'
+
 
 def test_get_non_existing_user():
     repo = InMemoryUserRepositoryFake()
-    usecase = GetUserUseCase(repo)
+    presenter = GetUserPresenterFake()
+    usecase = GetUserUseCase(repo, presenter)
 
     request = GetUserRequest('not_found@example.com')
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.found is False
-    assert response.user is None
+    assert presenter.last_response.found is False
+    assert presenter.last_response.user is None
