@@ -7,4 +7,9 @@ def is_valid_email(email: str) -> bool:
 def is_valid_name(name: str) -> bool:
     if not name:
         return False
+
+    if len(name) < 2:
+        return False
+
     return True
+
