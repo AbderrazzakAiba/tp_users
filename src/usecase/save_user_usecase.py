@@ -9,6 +9,10 @@ class SaveUserUseCase:
         if not request.email:
             return SaveUserResponse(False)
 
+        # minimal validation for email format
+        if "@" not in request.email:
+            return SaveUserResponse(False)
+
         user = User(request.email, request.name)
         self.repo.save(user)
         return SaveUserResponse(True)
