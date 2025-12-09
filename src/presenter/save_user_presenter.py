@@ -1,4 +1,4 @@
-from src.usecase.save_user_outputport import SaveUserOutputPort
+from src.usecase.ports import SaveUserOutputPort
 from src.presenter.save_user_viewmodel import SaveUserViewModel
 
 class SaveUserPresenter(SaveUserOutputPort):
