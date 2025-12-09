@@ -9,95 +9,106 @@ class InMemoryUserRepositoryFake:
     def save(self, user):
         self.saved.append(user)
 
-    # added as requested
     def exists_by_email(self, email) -> bool:
         return any(u.email == email for u in self.saved)
 
 
+class SaveUserPresenterFake:
+    def __init__(self):
+        self.last_response = None
+
+    def present(self, response):
+        self.last_response = response
+
+
 def test_saves_user():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
     request = SaveUserRequest("alex@example.com", "Alex")
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.success is True
+    assert presenter.last_response.success is True
     assert len(repo.saved) == 1
 
 
 def test_fails_when_email_is_empty():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
     request = SaveUserRequest("", "Alex")
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.success is False
+    assert presenter.last_response.success is False
     assert len(repo.saved) == 0
 
 
 def test_fails_when_email_not_valid_format():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
     request = SaveUserRequest("not-email", "Alex")
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.success is False
+    assert presenter.last_response.success is False
     assert len(repo.saved) == 0
 
 
 def test_fails_when_name_is_empty():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
     request = SaveUserRequest("alex@example.com", "")
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.success is False
+    assert presenter.last_response.success is False
     assert len(repo.saved) == 0
 
 
 def test_fails_when_name_is_too_short():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
-    request = SaveUserRequest("alex@example.com", "A")  # length = 1
+    request = SaveUserRequest("alex@example.com", "A")
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.success is False
+    assert presenter.last_response.success is False
     assert len(repo.saved) == 0
 
 
 def test_fails_when_name_contains_digits():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
-    request = SaveUserRequest("alex@example.com", "Al3x")  # contains number
+    request = SaveUserRequest("alex@example.com", "Al3x")
 
-    response = usecase.execute(request)
+    usecase.execute(request)
 
-    assert response.success is False
+    assert presenter.last_response.success is False
     assert len(repo.saved) == 0
 
 
 def test_fails_when_email_already_exists():
     repo = InMemoryUserRepositoryFake()
-    usecase = SaveUserUseCase(repo)
+    presenter = SaveUserPresenterFake()
+    usecase = SaveUserUseCase(repo, presenter)
 
-    # save user first
     request1 = SaveUserRequest("alex@example.com", "Alex")
     usecase.execute(request1)
 
-    # try to save again
     request2 = SaveUserRequest("alex@example.com", "Alex")
-    response = usecase.execute(request2)
+    usecase.execute(request2)
 
-    assert response.success is False
-    # still only one saved user
+    assert presenter.last_response.success is False
     assert len(repo.saved) == 1
