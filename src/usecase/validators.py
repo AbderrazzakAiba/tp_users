@@ -11,5 +11,10 @@ def is_valid_name(name: str) -> bool:
     if len(name) < 2:
         return False
 
+    # NEW minimal rule: no digits inside name
+    if any(char.isdigit() for char in name):
+        return False
+
     return True
+
 
