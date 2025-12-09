@@ -10,7 +10,9 @@ class InMemoryUserRepositoryFake:
         self.saved.append(user)
 
     def delete_by_email(self, email):
+        initial_len = len(self.saved)
         self.saved = [u for u in self.saved if u.email != email]
+        return len(self.saved) < initial_len
 
 
 def test_delete_existing_user():
@@ -25,6 +27,7 @@ def test_delete_existing_user():
 
     assert response.deleted is True
     assert len(repo.saved) == 0
+
 
 def test_delete_non_existing_user():
     repo = InMemoryUserRepositoryFake()
