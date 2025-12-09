@@ -11,6 +11,10 @@ class SaveUserUseCase:
         if not self._is_valid_request(request):
             return SaveUserResponse(False)
 
+        # NEW minimal uniqueness check
+        if hasattr(self.repo, "exists_by_email") and self.repo.exists_by_email(request.email):
+            return SaveUserResponse(False)
+
         user = User(request.email, request.name)
         self.repo.save(user)
         return SaveUserResponse(True)

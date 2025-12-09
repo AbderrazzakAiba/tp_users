@@ -9,6 +9,10 @@ class InMemoryUserRepositoryFake:
     def save(self, user):
         self.saved.append(user)
 
+    # added as requested
+    def exists_by_email(self, email) -> bool:
+        return any(u.email == email for u in self.saved)
+
 
 def test_saves_user():
     repo = InMemoryUserRepositoryFake()
@@ -21,6 +25,7 @@ def test_saves_user():
     assert response.success is True
     assert len(repo.saved) == 1
 
+
 def test_fails_when_email_is_empty():
     repo = InMemoryUserRepositoryFake()
     usecase = SaveUserUseCase(repo)
@@ -31,6 +36,7 @@ def test_fails_when_email_is_empty():
 
     assert response.success is False
     assert len(repo.saved) == 0
+
 
 def test_fails_when_email_not_valid_format():
     repo = InMemoryUserRepositoryFake()
@@ -43,6 +49,7 @@ def test_fails_when_email_not_valid_format():
     assert response.success is False
     assert len(repo.saved) == 0
 
+
 def test_fails_when_name_is_empty():
     repo = InMemoryUserRepositoryFake()
     usecase = SaveUserUseCase(repo)
@@ -54,6 +61,7 @@ def test_fails_when_name_is_empty():
     assert response.success is False
     assert len(repo.saved) == 0
 
+
 def test_fails_when_name_is_too_short():
     repo = InMemoryUserRepositoryFake()
     usecase = SaveUserUseCase(repo)
@@ -64,6 +72,8 @@ def test_fails_when_name_is_too_short():
 
     assert response.success is False
     assert len(repo.saved) == 0
+
+
 def test_fails_when_name_contains_digits():
     repo = InMemoryUserRepositoryFake()
     usecase = SaveUserUseCase(repo)
