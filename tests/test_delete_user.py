@@ -25,3 +25,14 @@ def test_delete_existing_user():
 
     assert response.deleted is True
     assert len(repo.saved) == 0
+
+def test_delete_non_existing_user():
+    repo = InMemoryUserRepositoryFake()
+    usecase = DeleteUserUseCase(repo)
+
+    request = DeleteUserRequest('not_found@example.com')
+
+    response = usecase.execute(request)
+
+    assert response.deleted is False
+    assert len(repo.saved) == 0
