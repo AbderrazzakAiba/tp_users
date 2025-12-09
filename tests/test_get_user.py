@@ -28,3 +28,14 @@ def test_get_existing_user():
 
     assert response.found is True
     assert response.user.email == 'alex@example.com'
+
+def test_get_non_existing_user():
+    repo = InMemoryUserRepositoryFake()
+    usecase = GetUserUseCase(repo)
+
+    request = GetUserRequest('not_found@example.com')
+
+    response = usecase.execute(request)
+
+    assert response.found is False
+    assert response.user is None
