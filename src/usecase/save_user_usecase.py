@@ -6,6 +6,10 @@ class SaveUserUseCase:
         self.repo = repo
 
     def execute(self, request):
+        if not request.email:
+            return SaveUserResponse(False)
+
         user = User(request.email, request.name)
         self.repo.save(user)
         return SaveUserResponse(True)
+
